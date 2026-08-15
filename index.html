@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎪 语文互动游戏 - 部编版一年级下册</title>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        :root {
+            --font-cute: 'Comic Sans MS', 'KaiTi', 'STKaiti', '楷体', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --font-kai: 'KaiTi', 'STKaiti', '楷体', 'STSong', 'SimKai', serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-cute);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, #b8e4ff 0%, #d4f0ff 25%, #e8f8ff 50%, #c5f0d0 75%, #b7e8c0 100%);
+            min-height: 100vh;
+            padding: 0 10px 30px;
+        }
+
+        /* ===== 关卡切换标签 ===== */
+        .level-tabs {
+            display: flex; justify-content: center; gap: 8px; padding: 12px 16px 4px; z-index: 100; position: relative; flex-wrap: wrap;
+        }
+        .level-tab {
+            padding: 10px 18px; border-radius: 25px; border: 3px solid #ff9a76; background: white; cursor: pointer;
+            font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; color: #e87d5c; transition: all 0.25s;
+            font-family: var(--font-cute); white-space: nowrap; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        .level-tab:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14); background: #fff5f0; }
+        .level-tab.active { background: #ff9a76; color: white; border-color: #e87d5c; box-shadow: 0 5px 16px rgba(255, 122, 100, 0.4); animation: tabGlow 2s ease-in-out infinite; }
+        @keyframes tabGlow { 0%, 100% { box-shadow: 0 5px 16px rgba(255, 122, 100, 0.4); } 50% { box-shadow: 0 5px 28px rgba(255, 122, 100, 0.7); } }
+        .level-tab .tab-icon { margin-right: 4px; }
+
+        /* ===== 游戏容器 ===== */
+        .game-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; padding: 0 10px; }
+        .level-container { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 600px; }
+        .level-container.active { display: flex; }
+
+        /* ===== 背景装饰 ===== */
+        .cloud { position: fixed; background: white; border-radius: 50%; opacity: 0.7; z-index: 0; pointer-events: none; animation: floatCloud 18s ease-in-out infinite; }
+        .cloud::before, .cloud::after { content: ''; position: absolute; background: white; border-radius: 50%; }
+        .cloud1 { width: 120px; height: 55px; top: 6%; left: 5%; border-radius: 55px; }
+        .cloud1::before { width: 55px; height: 55px; top: -28px; left: 22px; }
+        .cloud1::after { width: 70px; height: 65px; top: -22px; left: 55px; }
+        .cloud2 { width: 100px; height: 45px; top: 12%; right: 6%; border-radius: 45px; animation-delay: -7s; animation-duration: 20s; }
+        .cloud2::before { width: 45px; height: 45px; top: -22px; left: 18px; }
+        .cloud2::after { width: 58px; height: 52px; top: -18px; left: 44px; }
+        .cloud3 { width: 85px; height: 38px; top: 20%; left: 28%; border-radius: 38px; animation-delay: -12s; animation-duration: 22s; }
+        .cloud3::before { width: 38px; height: 38px; top: -18px; left: 14px; }
+        .cloud3::after { width: 50px; height: 44px; top: -15px; left: 38px; }
+        @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(35px); } 50% { transform: translateX(-18px); } 75% { transform: translateX(28px); } }
+
+        /* ===== 第一关：小公鸡和小鸭子 - 扭蛋机 ===== */
+        .title-area { text-align: center; z-index: 11; margin-bottom: 8px; }
+        .title { font-size: clamp(1.5rem, 3.2vw, 2rem); font-weight: bold; color: #ff6b6b; text-shadow: 3px 3px 0 #ffe0e0, 0 0 20px rgba(255, 150, 120, 0.35); letter-spacing: 3px; animation: titleBounce 2.5s ease-in-out infinite; }
+        @keyframes titleBounce { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } 60% { transform: translateY(-3px); } }
+        .gacha-machine { position: relative; width: 310px; display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15)); }
+        .machine-top-ornament { width: 35px; height: 35px; background: radial-gradient(circle at 40% 35%, #ffe566 0%, #ffb833 60%, #e8991a 100%); border-radius: 50%; z-index: 5; margin-bottom: -6px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); animation: ornamentGlow 2s ease-in-out infinite; }
+        @keyframes ornamentGlow { 0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 184, 51, 0.5); } 50% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 0 0 30px rgba(255, 200, 80, 0.8); } }
+        .dome-section { position: relative; width: 230px; height: 210px; background: rgba(255, 255, 255, 0.55); border-radius: 115px 115px 28px 28px; border: 5px solid #ffccb5; border-bottom: none; overflow: hidden; z-index: 3; box-shadow: inset 0 8px 25px rgba(255, 255, 255, 0.6), 0 -5px 15px rgba(0, 0, 0, 0.06); backdrop-filter: blur(2px); }
+        .dome-section::after { content: ''; position: absolute; top: 16px; left: 28px; width: 65px; height: 40px; background: rgba(255, 255, 255, 0.65); border-radius: 50%; pointer-events: none; z-index: 6; transform: rotate(-15deg); }
+        .ball-chamber { position: absolute; top: 50%; left: 50%; width: 170px; height: 170px; margin-top: -85px; margin-left: -85px; border-radius: 50%; z-index: 2; transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.1, 1); }
+        .ball-chamber.spinning { transition: transform 1.3s cubic-bezier(0.15, 0.05, 0.05, 0.95); }
+        .egg-ball { position: absolute; width: 50px; height: 55px; border-radius: 50% 50% 48% 48%; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: default; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), inset 0 -4px 6px rgba(0, 0, 0, 0.08), inset 0 4px 8px rgba(255, 255, 255, 0.5); z-index: 3; pointer-events: none; }
+        .egg-ball::before { content: ''; position: absolute; top: 7px; left: 13px; width: 17px; height: 10px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; pointer-events: none; z-index: 4; }
+        .egg-ball.ball-0 { background: radial-gradient(circle at 40% 30%, #ffb3ba 0%, #f48a94 45%, #e0676f 100%); }
+        .egg-ball.ball-1 { background: radial-gradient(circle at 40% 30%, #ffcc80 0%, #f5a54a 45%, #e08930 100%); }
+        .egg-ball.ball-2 { background: radial-gradient(circle at 40% 30%, #ffe57f 0%, #f5cd45 45%, #e0b820 100%); }
+        .egg-ball.ball-3 { background: radial-gradient(circle at 40% 30%, #b3e5b0 0%, #6fbf6a 45%, #4a9e44 100%); }
+        .egg-ball.ball-4 { background: radial-gradient(circle at 40% 30%, #b3d9ff 0%, #6aabf0 45%, #4088d0 100%); }
+        .egg-ball.ball-5 { background: radial-gradient(circle at 40% 30%, #d4b8f0 0%, #a87dd4 45%, #7d54b8 100%); }
+        .egg-ball.selected-glow { animation: glowPulse 0.5s ease-in-out 3; z-index: 5 !important; }
+        @keyframes glowPulse { 0%, 100% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 150, 0.6); } 50% { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 0 35px rgba(255, 255, 100, 1), 0 0 60px rgba(255, 200, 50, 0.7); } }
+        .machine-body { position: relative; width: 240px; height: 150px; background: linear-gradient(180deg, #ff9a76 0%, #f8825a 30%, #e8724d 100%); border-radius: 18px 18px 32px 32px; z-index: 2; margin-top: -8px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), inset 0 4px 15px rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; }
+        .crank-button { width: 78px; height: 78px; background: radial-gradient(circle at 45% 35%, #ff7b7b 0%, #ff4d4d 40%, #d63030 100%); border-radius: 50%; border: none; cursor: pointer; z-index: 5; box-shadow: 0 8px 0 #c0392b, 0 12px 25px rgba(0, 0, 0, 0.18); position: relative; transition: all 0.1s ease; font-size: 34px; color: white; text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3); outline: none; animation: buttonIdle 3s ease-in-out infinite; display: flex; align-items: center; justify-content: center; }
+        .crank-button:hover { transform: translateY(-3px); box-shadow: 0 10px 0 #c0392b, 0 16px 30px rgba(0, 0, 0, 0.22); }
+        .crank-button:active { transform: translateY(6px); box-shadow: 0 2px 0 #c0392b, 0 4px 10px rgba(0, 0, 0, 0.2); transition: all 0.05s ease; }
+        .crank-button:disabled { cursor: not-allowed; opacity: 0.7; animation: none; transform: translateY(4px); box-shadow: 0 3px 0 #c0392b, 0 5px 10px rgba(0, 0, 0, 0.15); }
+        @keyframes buttonIdle { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } 70% { transform: translateY(-2px); } }
+        .outlet-area { position: relative; width: 210px; height: 85px; background: linear-gradient(180deg, #ffe0a3 0%, #f5cc7a 40%, #e8bc60 100%); border-radius: 0 0 38px 38px; z-index: 1; margin-top: -3px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1), inset 0 -5px 12px rgba(0, 0, 0, 0.08); display: flex; align-items: center; justify-content: center; overflow: visible; }
+        .outlet-opening { width: 75px; height: 50px; background: #5c3d2e; border-radius: 0 0 32px 32px; position: relative; box-shadow: inset 0 6px 15px rgba(0, 0, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-end; justify-content: center; overflow: visible; }
+        .machine-base { width: 265px; height: 35px; background: linear-gradient(180deg, #ffe8b8 0%, #e8c576 60%, #d4a94e 100%); border-radius: 8px 8px 22px 22px; z-index: 0; margin-top: -2px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), inset 0 3px 8px rgba(255, 255, 255, 0.3); }
+        .dropped-ball { position: absolute; bottom: -6px; width: 48px; height: 52px; border-radius: 50% 50% 48% 48%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 20; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25), inset 0 -4px 6px rgba(0, 0, 0, 0.08), inset 0 4px 8px rgba(255, 255, 255, 0.5); animation: ballDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; pointer-events: none; }
+        .dropped-ball::before { content: ''; position: absolute; top: 6px; left: 12px; width: 15px; height: 9px; background: rgba(255, 255, 255, 0.55); border-radius: 50%; pointer-events: none; z-index: 22; }
+        @keyframes ballDrop { 0% { transform: translateY(-150px) scale(0.7); opacity: 0; } 40% { transform: translateY(-18px) scale(1.1); opacity: 1; } 65% { transform: translateY(6px) scale(0.9); } 80% { transform: translateY(-3px) scale(1.03); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        .char-bubble { position: absolute; top: -70px; left: 50%; transform: translateX(-50%); background: white; border-radius: 18px; padding: 8px 18px; font-size: 1.7rem; font-weight: bold; color: #ff5c5c; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); z-index: 30; animation: bubblePop 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards; pointer-events: none; white-space: nowrap; letter-spacing: 1px; }
+        .char-bubble::after { content: ''; position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 14px solid white; }
+        @keyframes bubblePop { 0% { transform: translateX(-50%) scale(0); opacity: 0; } 60% { transform: translateX(-50%) scale(1.2); opacity: 1; } 100% { transform: translateX(-50%) scale(1); opacity: 1; } }
+        .collected-area { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; z-index: 11; min-height: 55px; padding: 10px 18px; background: rgba(255, 255, 255, 0.7); border-radius: 28px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); backdrop-filter: blur(4px); margin-top: 8px; }
+        .collected-label { font-size: 0.9rem; color: #888; font-weight: bold; letter-spacing: 2px; margin-right: 2px; }
+        .collected-char { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%); border: 3px dashed #ffc107; font-size: 1.3rem; font-weight: bold; color: #e87d2f; animation: charAppear 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); }
+        .collected-char.empty-slot { background: rgba(200, 200, 200, 0.2); border: 3px dashed #ccc; color: transparent; animation: none; }
+        @keyframes charAppear { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 70% { transform: scale(1.25) rotate(5deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+        .reset-btn { padding: 10px 22px; border-radius: 25px; background: linear-gradient(135deg, #a0d8ef 0%, #6bb5d0 100%); border: none; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; letter-spacing: 2px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); transition: all 0.2s ease; font-family: var(--font-cute); z-index: 11; margin-top: 6px; }
+        .reset-btn:hover { transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0, 0, 0, 0.18); }
+        .reset-btn.hidden { display: none; }
+        .particle { position: fixed; pointer-events: none; z-index: 50; font-size: 22px; animation: particleFly 0.9s ease-out forwards; }
+        @keyframes particleFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; } }
+
+        /* ============================================================
+               第二关：树和喜鹊 - 太空射击
+               ============================================================ */
+        .level2-container { width: 100%; max-width: 550px; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25); position: relative; border: 3px solid #5a3d8a; margin-top: 10px; background: #0a0720; }
+        .space-area { position: relative; width: 100%; height: 500px; overflow: hidden; cursor: pointer; background: linear-gradient(180deg, #0a0720 0%, #1a0a3a 25%, #2a1048 50%, #3a1858 70%, #4a2068 100%); }
+        .star { position: absolute; background: white; border-radius: 50%; pointer-events: none; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+        .moon-surface { position: absolute; bottom: 0; left: 0; width: 100%; height: 100px; background: radial-gradient(ellipse at 30% 100%, #7a4ba0 0%, #5a2d7a 40%, #3a1a5a 80%, #1a0a3a 100%); border-radius: 60% 40% 0 0 / 40px 30px 0 0; z-index: 2; box-shadow: inset 0 20px 40px rgba(0, 0, 0, 0.5); pointer-events: none; }
+        .crater { position: absolute; border-radius: 50%; background: rgba(0, 0, 0, 0.25); box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(255, 255, 255, 0.05); pointer-events: none; z-index: 3; }
+        .crater1 { width: 50px; height: 30px; bottom: 28px; left: 8%; border-radius: 50% 60% 40% 50%; }
+        .crater2 { width: 70px; height: 38px; bottom: 15px; left: 28%; border-radius: 60% 40% 50% 50%; }
+        .crater3 { width: 45px; height: 25px; bottom: 32px; left: 52%; border-radius: 40% 50% 60% 40%; }
+        .crater4 { width: 55px; height: 32px; bottom: 18px; left: 72%; border-radius: 50% 40% 50% 60%; }
+        .crater5 { width: 35px; height: 20px; bottom: 38px; left: 88%; border-radius: 60% 50% 40% 50%; }
+        .rocket-wrapper { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; width: 90px; height: 110px; }
+        .rocket { position: relative; width: 100%; height: 100%; filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.5)); }
+        .rocket-body { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 80px; background: linear-gradient(180deg, #f0f4ff 0%, #dce4f0 40%, #c8d4e8 100%); border-radius: 50% 50% 20% 20% / 60% 60% 20% 20%; z-index: 2; box-shadow: inset -8px 0 20px rgba(0, 0, 0, 0.08), inset 8px 0 20px rgba(255, 255, 255, 0.3); }
+        .rocket-nose { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 44px; height: 40px; background: linear-gradient(180deg, #4a8af0 0%, #2a6ad0 50%, #1a4aa0 100%); border-radius: 50% 50% 30% 30% / 70% 70% 20% 20%; z-index: 3; box-shadow: inset -4px 0 10px rgba(0, 0, 0, 0.2), inset 4px 0 10px rgba(255, 255, 255, 0.2); }
+        .rocket-window { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; background: radial-gradient(circle at 35% 30%, #7ac0ff 0%, #3a80d0 60%, #1a4a8a 100%); border-radius: 50%; z-index: 4; border: 3px solid #b0c8e0; box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.2), 0 0 15px rgba(58, 128, 208, 0.3); }
+        .rocket-window::after { content: ''; position: absolute; top: 4px; left: 6px; width: 10px; height: 6px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; transform: rotate(-20deg); }
+        .rocket-fin { position: absolute; bottom: 0; width: 18px; height: 30px; background: linear-gradient(180deg, #4a8af0 0%, #2a5aa0 100%); border-radius: 0 0 8px 8px; z-index: 1; }
+        .rocket-fin.left { left: -6px; transform: skewY(18deg); border-radius: 4px 0 12px 12px; }
+        .rocket-fin.right { right: -6px; transform: skewY(-18deg); border-radius: 0 4px 12px 12px; }
+        .rocket-fin.center { left: 50%; transform: translateX(-50%); width: 14px; height: 28px; background: linear-gradient(180deg, #3a7ad0 0%, #1a4a8a 100%); border-radius: 0 0 6px 6px; z-index: 0; }
+        .rocket-flame { position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); width: 28px; height: 32px; background: radial-gradient(ellipse at center bottom, #ff8800 0%, #ff4400 40%, #cc2200 70%, transparent 100%); border-radius: 50% 50% 30% 30% / 60% 60% 20% 20%; z-index: 0; animation: flameFlicker 0.15s ease-in-out infinite alternate; filter: blur(1px); }
+        .rocket-flame::before { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 16px; height: 22px; background: radial-gradient(ellipse at center bottom, #ffcc00 0%, #ff8800 50%, transparent 100%); border-radius: 50%; filter: blur(2px); }
+        @keyframes flameFlicker { 0% { transform: translateX(-50%) scale(1) rotate(-2deg); } 100% { transform: translateX(-50%) scale(1.1) rotate(2deg); } }
+        .rocket-label { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); font-weight: bold; letter-spacing: 2px; white-space: nowrap; z-index: 10; pointer-events: none; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); }
+        .alien-space { position: absolute; cursor: pointer; z-index: 15; animation: alienFallSpace linear forwards; }
+        @keyframes alienFallSpace { 0% { top: -100px; } 100% { top: 110%; } }
+        .alien-space-body { position: relative; width: 80px; height: 90px; display: flex; flex-direction: column; align-items: center; }
+        .alien-space-head { position: relative; width: 60px; height: 52px; border-radius: 50% 50% 45% 45%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -6px 16px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3); z-index: 2; background: linear-gradient(180deg, #8e44ad 0%, #6c3483 60%); }
+        .alien-space-hanzi { font-family: var(--font-kai); font-size: 2.2rem; font-weight: 900; color: #ffffff; text-shadow: 0 0 12px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 200, 50, 0.2); z-index: 5; letter-spacing: 0; position: relative; line-height: 1; }
+        .alien-space-eye { position: absolute; width: 10px; height: 12px; background: white; border-radius: 50%; top: 12px; z-index: 3; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3); }
+        .alien-space-eye.left { left: 8px; }
+        .alien-space-eye.right { right: 8px; }
+        .alien-space-eye::after { content: ''; position: absolute; width: 5px; height: 6px; background: #111; border-radius: 50%; top: 3px; left: 2px; animation: alienLookSpace 3s ease-in-out infinite; }
+        @keyframes alienLookSpace { 0%, 70%, 100% { transform: translateX(0); } 80% { transform: translateX(2px); } 90% { transform: translateX(-1px); } }
+        .alien-space-antenna { position: absolute; top: -12px; width: 2.5px; height: 14px; background: #888; border-radius: 2px; z-index: 1; }
+        .alien-space-antenna::after { content: ''; position: absolute; top: -6px; left: -4px; width: 10px; height: 8px; background: radial-gradient(circle, #ffdd57 0%, #f5a623 70%); border-radius: 50%; }
+        .alien-space-antenna.left-ant { left: 10px; transform: rotate(-18deg); }
+        .alien-space-antenna.right-ant { right: 10px; transform: rotate(18deg); }
+        .alien-space-body-lower { width: 42px; height: 30px; border-radius: 0 0 22px 22px; margin-top: -4px; background: #7d3c98; box-shadow: inset 0 -4px 10px rgba(0, 0, 0, 0.15); z-index: 1; position: relative; }
+        .alien-space-feet { display: flex; gap: 18px; margin-top: -2px; z-index: 0; }
+        .alien-space-foot { width: 14px; height: 10px; border-radius: 50%; background: #333; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+        .alien-color-0 .alien-space-head { background: linear-gradient(180deg, #9b59b6 0%, #7d3c98 60%); }
+        .alien-color-0 .alien-space-body-lower { background: #8e44ad; }
+        .alien-color-1 .alien-space-head { background: linear-gradient(180deg, #e74c3c 0%, #c0392b 60%); }
+        .alien-color-1 .alien-space-body-lower { background: #d63031; }
+        .alien-color-2 .alien-space-head { background: linear-gradient(180deg, #f39c12 0%, #d68910 60%); }
+        .alien-color-2 .alien-space-body-lower { background: #e67e22; }
+        .alien-color-3 .alien-space-head { background: linear-gradient(180deg, #2ecc71 0%, #1e8449 60%); }
+        .alien-color-3 .alien-space-body-lower { background: #27ae60; }
+        .alien-color-4 .alien-space-head { background: linear-gradient(180deg, #3498db 0%, #2471a3 60%); }
+        .alien-color-4 .alien-space-body-lower { background: #2980b9; }
+        .alien-color-5 .alien-space-head { background: linear-gradient(180deg, #e91e63 0%, #b71c4c 60%); }
+        .alien-color-5 .alien-space-body-lower { background: #c2185b; }
+        .space-controls { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: rgba(10, 7, 32, 0.8); border-radius: 20px; margin-top: 8px; z-index: 30; font-weight: bold; font-size: 0.85rem; color: #c8b8e0; backdrop-filter: blur(6px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .space-controls .speed-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; background: #6a3a9a; color: white; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); font-family: var(--font-cute); }
+        .space-controls .speed-btn:hover { background: #8a4aba; transform: scale(1.1); }
+        .space-controls .speed-btn:active { transform: scale(0.9); }
+        .space-controls .speed-indicator { padding: 4px 12px; background: rgba(255, 255, 255, 0.08); border-radius: 12px; min-width: 50px; text-align: center; font-weight: bold; color: #f5c842; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .space-controls .speed-label { color: #a090c0; font-size: 0.75rem; letter-spacing: 1px; }
+        .level2-collected { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; padding: 8px 16px; background: rgba(10, 7, 32, 0.7); border-radius: 22px; margin-top: 6px; backdrop-filter: blur(6px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); z-index: 30; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .level2-collected .l2-label { color: #a090c0; font-weight: bold; font-size: 0.85rem; margin-right: 4px; letter-spacing: 1px; }
+        .l2-char-slot { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; font-family: var(--font-kai); transition: all 0.3s; }
+        .l2-char-slot.got { background: linear-gradient(135deg, #f5c842, #e8a820); border: 2px solid #f5c842; color: #1a0a3a; animation: charAppear 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards; box-shadow: 0 0 20px rgba(245, 200, 66, 0.3); }
+        .l2-char-slot.empty { background: rgba(255, 255, 255, 0.05); border: 2px dashed rgba(255, 255, 255, 0.15); color: transparent; }
+        .reset-btn-space { padding: 10px 22px; border-radius: 25px; background: linear-gradient(135deg, #6a3a9a 0%, #4a1a7a 100%); border: none; color: #f5c842; font-size: 1rem; font-weight: bold; cursor: pointer; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: all 0.2s ease; font-family: var(--font-cute); z-index: 11; margin-top: 6px; border: 1px solid rgba(255, 255, 255, 0.08); }
+        .reset-btn-space:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); background: linear-gradient(135deg, #8a4aba 0%, #5a2a8a 100%); }
+        .reset-btn-space.hidden { display: none; }
+        .space-hint { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); z-index: 22; color: rgba(255, 255, 255, 0.25); font-size: 0.75rem; letter-spacing: 2px; pointer-events: none; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); white-space: nowrap; background: rgba(0, 0, 0, 0.2); padding: 4px 14px; border-radius: 12px; backdrop-filter: blur(4px); }
+
+        /* ============================================================
+               第三关：怎么都快乐 - 大熊猫看大家玩
+               ============================================================ */
+        .level3-container { width: 100%; max-width: 580px; background: linear-gradient(180deg, #e6f7fe 0%, #bae5f5 30%, #8ad0e8 80%, #5fb8d6 100%); border-radius: 32px; padding: 20px 20px 30px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); position: relative; border: 4px solid #a0d4e8; margin-top: 10px; }
+        .panda-scene { position: relative; width: 100%; height: 240px; background: radial-gradient(ellipse at 50% 90%, #7ccf7c 0%, #5fb85f 60%, transparent 100%); border-radius: 20px 20px 40px 40px; margin-bottom: 24px; border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.05); overflow: visible; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+        .panda-sun { position: absolute; top: 12px; right: 20px; width: 40px; height: 40px; background: radial-gradient(circle, #ffeb3b 0%, #ffb300 100%); border-radius: 50%; box-shadow: 0 0 30px rgba(255, 200, 0, 0.3); pointer-events: none; }
+        .panda-sun::after { content: ''; position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(255, 200, 0, 0.15); animation: sunGlow 3s ease-in-out infinite alternate; }
+        @keyframes sunGlow { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } }
+        .panda-wrap { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; margin-bottom: 0px; width: 100%; }
+        .panda-img { width: 140px; height: auto; display: block; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15)); transition: transform 0.3s ease; }
+        .panda-speech { position: absolute; top: -30px; left: 60px; background: white; border-radius: 20px 20px 20px 5px; padding: 10px 20px; font-size: 1.2rem; font-weight: bold; color: #4a7a4a; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08); white-space: nowrap; animation: speechBounce 2s ease-in-out infinite; z-index: 20; }
+        @keyframes speechBounce { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } 60% { transform: translateY(-2px); } }
+        .panda-speech::after { content: ''; position: absolute; bottom: -10px; left: 15px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid white; }
+        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 6px; padding: 0 8px; }
+        .card-l3 { background: rgba(255, 255, 255, 0.85); border-radius: 18px; padding: 12px 8px 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); cursor: pointer; transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.2); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; aspect-ratio: 1 / 1.1; }
+        .card-l3:hover:not(.disabled) { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); border-color: #8ccf8c; }
+        .card-l3.disabled { opacity: 0.45; cursor: default; transform: scale(0.95); filter: grayscale(0.4); border-color: #ddd; }
+        .card-l3 img { width: 80%; height: auto; max-height: 90px; object-fit: contain; border-radius: 12px; margin-bottom: 4px; }
+        .char-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(255, 255, 255, 0.85); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 900; color: #ff6b6b; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.2); pointer-events: none; z-index: 5; border: 3px solid white; font-family: var(--font-kai); }
+        .card-l3.active .char-overlay { transform: translate(-50%, -50%) scale(1); animation: charPop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.2); }
+        @keyframes charPop { 0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); } 60% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); } 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); } }
+        .collected-area-l3 { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; z-index: 11; min-height: 55px; padding: 8px 14px; background: rgba(255, 255, 255, 0.7); border-radius: 28px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); backdrop-filter: blur(4px); margin-top: 16px; width: 100%; }
+        .collected-label-l3 { font-size: 0.9rem; color: #5a7a8a; font-weight: bold; letter-spacing: 2px; margin-right: 4px; }
+        .collected-char-l3 { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #e6f7fe 0%, #bae5f5 100%); border: 3px dashed #5fb8d6; font-size: 1.3rem; font-weight: bold; color: #2a5a6a; transition: all 0.3s; font-family: var(--font-kai); }
+        .collected-char-l3.got { background: linear-gradient(135deg, #fde6a8 0%, #f5c842 100%); border: 3px solid #f5c842; color: #4a3a1a; animation: charAppear 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards; box-shadow: 0 0 20px rgba(245, 200, 66, 0.3); }
+        .collected-char-l3.empty { background: rgba(200, 200, 200, 0.2); border: 3px dashed #ccc; color: transparent; }
+
+        /* ============================================================
+               第四关：语文园地三 - 丰富版消消乐 (4张图片作为卡片背景)
+               ============================================================ */
+        .match-game-container {
+            width: 100%;
+            max-width: 520px;
+            background: #fffdfa;
+            border-radius: 32px;
+            padding: 25px 20px 25px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            border: 4px solid #d3e1eb;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .match-title-sub { font-size: 0.9rem; color: #557a9a; letter-spacing: 2px; margin-bottom: 12px; background: #eaf1f8; padding: 4px 18px; border-radius: 20px; font-weight: bold; }
+        
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto 18px;
+            aspect-ratio: 1 / 1;
+        }
+        .match-tile {
+            /* 卡片基础样式 */
+            border-radius: 18px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            font-family: var(--font-kai);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 6px 12px rgba(80, 50, 20, 0.08), inset 0 -3px 0 rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.2);
+            border: 2px solid rgba(255,255,255,0.8);
+            aspect-ratio: 1 / 1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+        /* 添加半透明遮罩层，让背景图隐约可见，文字清晰 */
+        .match-tile::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.85); /* 调整透明度这里 */
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 18px;
+        }
+        .match-tile span {
+            position: relative;
+            z-index: 2;
+            color: #3a2a1a; /* 深色文字，更易阅读 */
+        }
+        .match-tile:hover:not(.matched) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(80, 50, 20, 0.12);
+            border-color: #d4b08c;
+        }
+        .match-tile:active:not(.matched) { transform: scale(0.92); transition-duration: 0.05s; }
+        
+        /* 消除动画 */
+        .match-tile.matched {
+            animation: tilePop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards;
+            pointer-events: none;
+            cursor: default;
+        }
+        @keyframes tilePop {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.25) rotate(8deg); background: #ffeb3b; color: #d64f4f; box-shadow: 0 0 40px rgba(255, 235, 59, 0.5); }
+            100% { transform: scale(0) rotate(-30deg); opacity: 0; }
+        }
+        /* 消除后占位，加上纯色以防背景图消失不自然 */
+        .match-tile.matched::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(200, 220, 240, 0.6);
+            border-radius: 18px;
+            border: 2px dashed #bfd0df;
+            z-index: 3;
+            animation: none;
+        }
+        .match-tile.matched span { opacity: 0; }
+        
+        .match-bottom-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding-top: 8px;
+            border-top: 2px dashed #d3e1eb;
+        }
+        .match-status { font-size: 1rem; color: #6a4a3a; background: #f3f7fa; padding: 6px 18px; border-radius: 30px; letter-spacing: 1px; font-weight: bold; }
+        .match-status .highlight-num { color: #e87d2f; font-size: 1.2rem; }
+        
+        .collected-char-l4-container { display: flex; gap: 6px; flex-wrap: wrap; }
+        .char-slot-l4 { width: 34px; height: 34px; background: #f3f7fa; border: 2px dashed #9ab8d0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; color: #4a6a8a; font-family: var(--font-kai); transition: all 0.3s; }
+        .char-slot-l4.got { background: #fde6a8; border: 2px solid #e8b820; color: #4a3a1a; animation: charAppear 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards; }
+        .char-slot-l4.empty { color: transparent; }
+
+        .reset-btn-match {
+            padding: 10px 22px; border-radius: 25px; background: linear-gradient(135deg, #8ab4f8 0%, #6a94d8 100%);
+            border: none; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; letter-spacing: 2px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); transition: all 0.2s ease; font-family: var(--font-cute); margin-top: 12px;
+        }
+        .reset-btn-match:hover { transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0, 0, 0, 0.18); }
+        .reset-btn-match.hidden { display: none; }
+
+        .win-banner-l4 {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: rgba(255,255,255,0.95); padding: 30px 40px; border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center; z-index: 20; pointer-events: none;
+            transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.2); border: 4px solid #f5c842;
+        }
+        .win-banner-l4.show { transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        .win-banner-l4 .big-icon { font-size: 4rem; display: block; margin-bottom: 10px; }
+        .win-banner-l4 .text { font-size: 1.6rem; font-weight: bold; color: #e87d2f; letter-spacing: 4px; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .match-grid { gap: 12px; max-width: 300px; }
+            .match-tile { font-size: 2.4rem; border-radius: 14px; }
+            .match-game-container { padding: 20px 12px 20px; }
+            .win-banner-l4 { padding: 20px 30px; }
+            .win-banner-l4 .big-icon { font-size: 3rem; }
+            .win-banner-l4 .text { font-size: 1.2rem; }
+        }
+        @media (max-width: 380px) {
+            .match-grid { gap: 8px; max-width: 240px; }
+            .match-tile { font-size: 1.8rem; border-radius: 10px; }
+            .match-status { font-size: 0.8rem; padding: 4px 12px; }
+            .char-slot-l4 { width: 28px; height: 28px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景装饰 -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+
+    <!-- ===== 关卡切换标签 ===== -->
+    <div class="level-tabs">
+        <button class="level-tab active" data-level="1">
+            <span class="tab-icon">🐣</span> 第一关·小公鸡和小鸭子
+        </button>
+        <button class="level-tab" data-level="2">
+            <span class="tab-icon">🚀</span> 第二关·树和喜鹊
+        </button>
+        <button class="level-tab" data-level="3">
+            <span class="tab-icon">🐼</span> 第三关·怎么都快乐
+        </button>
+        <button class="level-tab" data-level="4">
+            <span class="tab-icon">📚</span> 第四关·语文园地三
+        </button>
+    </div>
+
+    <!-- ===== 游戏主容器 ===== -->
+    <div class="game-wrapper">
+
+        <!-- 第一关 -->
+        <div class="level-container active" id="level1Container">
+            <div class="title-area">
+                <div class="title">🐣 小公鸡和小鸭子 🦆</div>
+            </div>
+            <div class="gacha-machine">
+                <div class="machine-top-ornament"></div>
+                <div class="dome-section">
+                    <div class="ball-chamber" id="ballChamber"></div>
+                </div>
+                <div class="machine-body">
+                    <button class="crank-button" id="crankButton" title="按下扭蛋！">
+                        <span class="btn-sparkle"></span>🔘
+                    </button>
+                </div>
+                <div class="outlet-area">
+                    <div class="outlet-opening" id="outletOpening"></div>
+                </div>
+                <div class="machine-base"></div>
+            </div>
+            <div class="collected-area" id="collectedArea1">
+                <span class="collected-label">🎯 已收集：</span>
+                <span class="collected-char empty-slot">？</span>
+                <span class="collected-char empty-slot">？</span>
+                <span class="collected-char empty-slot">？</span>
+                <span class="collected-char empty-slot">？</span>
+                <span class="collected-char empty-slot">？</span>
+                <span class="collected-char empty-slot">？</span>
+            </div>
+            <button class="reset-btn hidden" id="resetButton1">🔄 再来一次！</button>
+        </div>
+
+        <!-- 第二关 -->
+        <div class="level-container" id="level2Container">
+            <div class="title-area">
+                <div class="title" style="color:#f5c842;text-shadow:3px 3px 0 #8a5a10,0 0 30px rgba(245,200,66,0.2);">
+                    🌳 树和喜鹊 🐦
+                </div>
+            </div>
+            <div class="level2-container">
+                <div class="space-area" id="spaceArea">
+                    <div class="moon-surface">
+                        <div class="crater crater1"></div>
+                        <div class="crater crater2"></div>
+                        <div class="crater crater3"></div>
+                        <div class="crater crater4"></div>
+                        <div class="crater crater5"></div>
+                    </div>
+                    <div class="rocket-wrapper" id="rocketWrapper">
+                        <div class="rocket">
+                            <div class="rocket-nose"></div>
+                            <div class="rocket-window"></div>
+                            <div class="rocket-body"></div>
+                            <div class="rocket-fin left"></div>
+                            <div class="rocket-fin right"></div>
+                            <div class="rocket-fin center"></div>
+                            <div class="rocket-flame"></div>
+                        </div>
+                        <div class="rocket-label">🚀 点击外星人发射激光</div>
+                    </div>
+                    <div class="space-hint">👆 点击任意外星人，火箭发射激光将其击落！</div>
+                </div>
+            </div>
+            <div class="space-controls">
+                <span class="speed-label">🐢</span>
+                <button class="speed-btn" id="speedDownSpace" title="减慢速度">−</button>
+                <span class="speed-indicator" id="speedIndicatorSpace">5秒</span>
+                <button class="speed-btn" id="speedUpSpace" title="加快速度">+</button>
+                <span class="speed-label">🐇</span>
+            </div>
+            <div class="level2-collected" id="level2Collected">
+                <span class="l2-label">🎯 已击落：</span>
+                <span class="l2-char-slot empty">？</span>
+                <span class="l2-char-slot empty">？</span>
+                <span class="l2-char-slot empty">？</span>
+                <span class="l2-char-slot empty">？</span>
+                <span class="l2-char-slot empty">？</span>
+                <span class="l2-char-slot empty">？</span>
+            </div>
+            <button class="reset-btn-space hidden" id="resetButton2">🔄 再来一次！</button>
+        </div>
+
+        <!-- 第三关 -->
+        <div class="level-container" id="level3Container">
+            <div class="title-area">
+                <div class="title" style="color:#4a8a4a;text-shadow:3px 3px 0 #cce8cc,0 0 20px rgba(100,180,100,0.2);">
+                    🐼 怎么都快乐
+                </div>
+            </div>
+            <div class="level3-container">
+                <div class="panda-scene">
+                    <div class="panda-sun"></div>
+                    <div class="panda-wrap">
+                        <img class="panda-img" src="https://img.shetu66.com/2025/07/22/175316457721413850.png" alt="大熊猫" />
+                        <div class="panda-speech">👋 哇，大家在玩什么呀？</div>
+                    </div>
+                </div>
+                <div class="cards-grid" id="cardsContainerL3"></div>
+                <div class="collected-area-l3" id="collectedAreaL3">
+                    <span class="collected-label-l3">📖 收集的生字：</span>
+                    <span class="collected-char-l3 empty">？</span>
+                    <span class="collected-char-l3 empty">？</span>
+                    <span class="collected-char-l3 empty">？</span>
+                    <span class="collected-char-l3 empty">？</span>
+                    <span class="collected-char-l3 empty">？</span>
+                    <span class="collected-char-l3 empty">？</span>
+                </div>
+                <button class="reset-btn hidden" id="resetButton3">🔄 再来一次！</button>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        第四关：语文园地三 - 带背景图的消消乐
+        ============================================================ -->
+        <div class="level-container" id="level4Container">
+            <div class="title-area">
+                <div class="title" style="color:#4a7a9a;text-shadow:3px 3px 0 #dceeff,0 0 20px rgba(100,160,220,0.2);">
+                    📚 语文园地三
+                </div>
+            </div>
+            <div class="match-game-container">
+                
+                <div class="match-title-sub">🎯 点击卡片消除生字</div>
+                <div class="match-grid" id="matchGrid"></div>
+                
+                <div class="match-bottom-area">
+                    <div class="match-status">
+                        进度：<span class="highlight-num" id="matchProgress">0</span> / 9
+                    </div>
+                    <div class="collected-char-l4-container" id="collectedCharL4Container">
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                        <span class="char-slot-l4 empty">？</span>
+                    </div>
+                </div>
+                
+                <button class="reset-btn-match hidden" id="resetButton4">🔄 再来一次！</button>
+
+                <div class="win-banner-l4" id="winBannerL4">
+                    <span class="big-icon">🎉</span>
+                    <div class="text">太棒啦！全收集！</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ==================== 全局：关卡切换 ====================
+            const tabs = document.querySelectorAll('.level-tab');
+            const containers = {
+                1: document.getElementById('level1Container'),
+                2: document.getElementById('level2Container'),
+                3: document.getElementById('level3Container'),
+                4: document.getElementById('level4Container'),
+            };
+            let currentLevel = 1;
+
+            function switchLevel(level) {
+                currentLevel = level;
+                tabs.forEach(t => t.classList.remove('active'));
+                Object.values(containers).forEach(c => c.classList.remove('active'));
+                const tab = document.querySelector(`.level-tab[data-level="${level}"]`);
+                if (tab) tab.classList.add('active');
+                if (containers[level]) containers[level].classList.add('active');
+                
+                if (level === 2 && !window._spaceGame) initSpaceGame();
+                if (level === 3 && !window._level3Game) initLevel3Game();
+                if (level === 4 && !window._level4Game) initLevel4Game();
+            }
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchLevel(parseInt(tab.getAttribute('data-level')));
+                });
+            });
+
+            // ==================== 音效系统 ====================
+            let audioCtx = null;
+            function getAudioContext() {
+                if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return audioCtx;
+            }
+            function playTone(freq, type, duration, vol = 0.08) {
+                try {
+                    const ctx = getAudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) {}
+            }
+            function playCrankSound() {
+                try {
+                    const ctx = getAudioContext();
+                    const now = ctx.currentTime;
+                    for (let i = 0; i < 8; i++) {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(160 + Math.random() * 140, now + i * 0.08);
+                        gain.gain.setValueAtTime(0.05, now + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.06);
+                        osc.start(now + i * 0.08);
+                        osc.stop(now + i * 0.08 + 0.06);
+                    }
+                } catch (e) {}
+            }
+            function playDropSound() { playTone(500, 'sine', 0.35, 0.12); setTimeout(() => playTone(300, 'sine', 0.25, 0.08), 150); }
+            function playSuccessSound() { [523, 659, 784].forEach((f, i) => { setTimeout(() => playTone(f, 'triangle', 0.2, 0.09), i * 110); }); }
+            function playShootSpace() { playTone(900, 'square', 0.08, 0.04); setTimeout(() => playTone(1400, 'square', 0.06, 0.03), 50); }
+            function playHitSpace() { playTone(180, 'sawtooth', 0.22, 0.12); setTimeout(() => playTone(300, 'triangle', 0.18, 0.08), 100); }
+            function playWinSpace() { [523, 659, 784, 1047].forEach((f, i) => { setTimeout(() => playTone(f, 'triangle', 0.18, 0.09), i * 110); }); }
+            function playResetSound() { playTone(350, 'sine', 0.28, 0.1); setTimeout(() => playTone(600, 'sine', 0.22, 0.08), 150); }
+            function playCollectL3() { playTone(523, 'triangle', 0.2, 0.08); setTimeout(() => playTone(659, 'triangle', 0.2, 0.08), 150); }
+            
+            function playPopSound() {
+                playTone(880, 'sine', 0.08, 0.06);
+                setTimeout(() => playTone(1100, 'sine', 0.06, 0.04), 40);
+            }
+
+            // ==================== 粒子特效 ====================
+            function spawnParticles(x, y, count = 12, emojis = ['✨', '⭐', '💫', '🌟', '🎉', '💥', '🎯', '🔥']) {
+                for (let i = 0; i < count; i++) {
+                    const p = document.createElement('span');
+                    p.className = 'particle';
+                    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    p.style.left = x + 'px';
+                    p.style.top = y + 'px';
+                    p.style.fontSize = (18 + Math.random() * 18) + 'px';
+                    p.style.setProperty('--px', (Math.random() - 0.5) * 180 + 'px');
+                    p.style.setProperty('--py', -(Math.random() * 140 + 30) + 'px');
+                    p.style.animationDuration = (0.5 + Math.random() * 0.7) + 's';
+                    document.body.appendChild(p);
+                    setTimeout(() => { if (p.parentNode) p.remove(); }, 1100);
+                }
+            }
+
+            // ==================== 第一关 - 完整逻辑 ====================
+            const ballDataL1 = [
+                { char: '走', animal: '🐱', colorClass: 'ball-0', gradient: 'radial-gradient(circle at 40% 30%, #ffb3ba 0%, #f48a94 45%, #e0676f 100%)' },
+                { char: '河', animal: '🐶', colorClass: 'ball-1', gradient: 'radial-gradient(circle at 40% 30%, #ffcc80 0%, #f5a54a 45%, #e08930 100%)' },
+                { char: '说', animal: '🐰', colorClass: 'ball-2', gradient: 'radial-gradient(circle at 40% 30%, #ffe57f 0%, #f5cd45 45%, #e0b820 100%)' },
+                { char: '让', animal: '🐼', colorClass: 'ball-3', gradient: 'radial-gradient(circle at 40% 30%, #b3e5b0 0%, #6fbf6a 45%, #4a9e44 100%)' },
+                { char: '自', animal: '🐨', colorClass: 'ball-4', gradient: 'radial-gradient(circle at 40% 30%, #b3d9ff 0%, #6aabf0 45%, #4088d0 100%)' },
+                { char: '己', animal: '🦊', colorClass: 'ball-5', gradient: 'radial-gradient(circle at 40% 30%, #d4b8f0 0%, #a87dd4 45%, #7d54b8 100%)' },
+            ];
+            const ballChamber = document.getElementById('ballChamber');
+            const crankButton = document.getElementById('crankButton');
+            const outletOpening = document.getElementById('outletOpening');
+            const outletArea = document.querySelector('.outlet-area');
+            const collectedArea1 = document.getElementById('collectedArea1');
+            const resetButton1 = document.getElementById('resetButton1');
+            let remainingIndicesL1 = [0, 1, 2, 3, 4, 5];
+            let collectedCharsL1 = [];
+            let isAnimatingL1 = false;
+            let currentRotationL1 = 0;
+
+            function initBallChamberL1() {
+                ballChamber.innerHTML = '';
+                const radius = 58, cx = 85, cy = 85;
+                ballDataL1.forEach((data, index) => {
+                    const ball = document.createElement('div');
+                    ball.className = `egg-ball ${data.colorClass}`;
+                    ball.setAttribute('data-index', index);
+                    ball.setAttribute('data-char', data.char);
+                    ball.textContent = data.animal;
+                    ball.title = data.char;
+                    const angle = (index / 6) * Math.PI * 2 - Math.PI / 2;
+                    ball.style.left = (cx + radius * Math.cos(angle) - 25) + 'px';
+                    ball.style.top = (cy + radius * Math.sin(angle) - 27) + 'px';
+                    ballChamber.appendChild(ball);
+                });
+            }
+
+            function spinChamberL1(duration = 1.3) {
+                return new Promise((resolve) => {
+                    const spins = 3 + Math.floor(Math.random() * 3);
+                    const extra = Math.random() * 360;
+                    currentRotationL1 += spins * 360 + extra;
+                    ballChamber.classList.add('spinning');
+                    ballChamber.style.transform = `rotate(${currentRotationL1}deg)`;
+                    playCrankSound();
+                    setTimeout(() => {
+                        ballChamber.classList.remove('spinning');
+                        resolve();
+                    }, duration * 1000);
+                });
+            }
+
+            function highlightBallL1(el) {
+                el.classList.add('selected-glow');
+                return new Promise(resolve => setTimeout(() => {
+                    el.classList.remove('selected-glow');
+                    resolve();
+                }, 800));
+            }
+
+            function dropBallAnimationL1(data) {
+                return new Promise((resolve) => {
+                    const oldBubble = outletArea.querySelector('.char-bubble');
+                    const oldDropped = outletOpening.querySelector('.dropped-ball');
+                    if (oldBubble) oldBubble.remove();
+                    if (oldDropped) oldDropped.remove();
+                    const dropped = document.createElement('div');
+                    dropped.className = 'dropped-ball';
+                    dropped.style.background = data.gradient;
+                    dropped.textContent = data.animal;
+                    outletOpening.appendChild(dropped);
+                    playDropSound();
+                    setTimeout(() => {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'char-bubble';
+                        bubble.textContent = '✨ ' + data.char + ' ✨';
+                        outletArea.appendChild(bubble);
+                        playSuccessSound();
+                        const rect = outletOpening.getBoundingClientRect();
+                        spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 10);
+                        setTimeout(() => { if (bubble.parentNode) bubble.remove(); }, 2000);
+                        resolve();
+                    }, 500);
+                });
+            }
+
+            function updateCollectedL1() {
+                const slots = collectedArea1.querySelectorAll('.collected-char');
+                slots.forEach((slot, i) => {
+                    if (i < collectedCharsL1.length) {
+                        slot.textContent = collectedCharsL1[i];
+                        slot.classList.remove('empty-slot');
+                        slot.style.background = 'linear-gradient(135deg, #fff9e6 0%, #fffde6 100%)';
+                        slot.style.border = '3px solid #ffc107';
+                        slot.style.color = '#e87d2f';
+                        slot.style.animation = 'none';
+                        void slot.offsetWidth;
+                        slot.style.animation = 'charAppear 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards';
+                    } else {
+                        slot.textContent = '？';
+                        slot.classList.add('empty-slot');
+                        slot.style.background = 'rgba(200,200,200,0.2)';
+                        slot.style.border = '3px dashed #ccc';
+                        slot.style.color = 'transparent';
+                        slot.style.animation = 'none';
+                    }
+                });
+                if (collectedCharsL1.length >= ballDataL1.length) {
+                    setTimeout(() => {
+                        resetButton1.classList.remove('hidden');
+                        crankButton.disabled = true;
+                        const rect = document.querySelector('.gacha-machine').getBoundingClientRect();
+                        spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 18, ['🎊', '🎉', '🥳', '🏆', '💯', '👏', '🎈', '🌟']);
+                    }, 600);
+                }
+            }
+
+            async function performGachaL1() {
+                if (isAnimatingL1 || remainingIndicesL1.length === 0) return;
+                isAnimatingL1 = true;
+                crankButton.disabled = true;
+                const pos = Math.floor(Math.random() * remainingIndicesL1.length);
+                const idx = remainingIndicesL1[pos];
+                remainingIndicesL1.splice(pos, 1);
+                const data = ballDataL1[idx];
+                await spinChamberL1(1.2 + Math.random() * 0.4);
+                const balls = ballChamber.querySelectorAll('.egg-ball');
+                let target = null;
+                balls.forEach(b => { if (parseInt(b.getAttribute('data-index')) === idx) target = b; });
+                if (target) await highlightBallL1(target);
+                await new Promise(r => setTimeout(r, 300));
+                balls.forEach(b => {
+                    if (parseInt(b.getAttribute('data-index')) === idx) {
+                        b.style.transition = 'all 0.35s cubic-bezier(0.6,0,1,1)';
+                        b.style.transform = 'scale(0)';
+                        b.style.opacity = '0';
+                        setTimeout(() => { if (b.parentNode) b.remove(); }, 400);
+                    }
+                });
+                await dropBallAnimationL1(data);
+                collectedCharsL1.push(data.char);
+                updateCollectedL1();
+                isAnimatingL1 = false;
+                if (remainingIndicesL1.length > 0) crankButton.disabled = false;
+                else crankButton.disabled = true;
+            }
+
+            function resetGameL1() {
+                if (isAnimatingL1) return;
+                playResetSound();
+                remainingIndicesL1 = [0, 1, 2, 3, 4, 5];
+                collectedCharsL1 = [];
+                currentRotationL1 = 0;
+                isAnimatingL1 = false;
+                crankButton.disabled = false;
+                resetButton1.classList.add('hidden');
+                const oldBubble = outletArea.querySelector('.char-bubble');
+                const oldDropped = outletOpening.querySelector('.dropped-ball');
+                if (oldBubble) oldBubble.remove();
+                if (oldDropped) oldDropped.remove();
+                ballChamber.style.transition = 'transform 0.6s ease';
+                ballChamber.style.transform = 'rotate(0deg)';
+                setTimeout(() => { ballChamber.style.transition = 'transform 1.2s cubic-bezier(0.25,0.1,0.1,1)'; }, 650);
+                initBallChamberL1();
+                const slots = collectedArea1.querySelectorAll('.collected-char');
+                slots.forEach(s => {
+                    s.textContent = '？';
+                    s.classList.add('empty-slot');
+                    s.style.background = 'rgba(200,200,200,0.2)';
+                    s.style.border = '3px dashed #ccc';
+                    s.style.color = 'transparent';
+                    s.style.animation = 'none';
+                });
+            }
+            crankButton.addEventListener('click', () => { if (!isAnimatingL1 && remainingIndicesL1.length > 0) performGachaL1(); });
+            resetButton1.addEventListener('click', resetGameL1);
+
+            // ==================== 第二关 - 完整逻辑 ====================
+            const charsL2 = ['从', '好', '们', '叫', '他', '回'];
+            const alienColorsL2 = ['alien-color-0', 'alien-color-1', 'alien-color-2', 'alien-color-3', 'alien-color-4', 'alien-color-5'];
+            let spaceGame = null;
+
+            function initSpaceGame() {
+                if (window._spaceGame) return;
+                
+                const spaceArea = document.getElementById('spaceArea');
+                const rocketWrapper = document.getElementById('rocketWrapper');
+                const speedIndicatorSpace = document.getElementById('speedIndicatorSpace');
+                const speedUpSpace = document.getElementById('speedUpSpace');
+                const speedDownSpace = document.getElementById('speedDownSpace');
+                const level2Collected = document.getElementById('level2Collected');
+                const resetButton2 = document.getElementById('resetButton2');
+
+                function createStars() {
+                    const existing = spaceArea.querySelectorAll('.star');
+                    existing.forEach(s => s.remove());
+                    for (let i = 0; i < 80; i++) {
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        const size = 1.5 + Math.random() * 3;
+                        star.style.width = size + 'px';
+                        star.style.height = size + 'px';
+                        star.style.left = Math.random() * 98 + '%';
+                        star.style.top = Math.random() * 70 + '%';
+                        star.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+                        star.style.animationDelay = (Math.random() * 4) + 's';
+                        star.style.opacity = 0.3 + Math.random() * 0.5;
+                        spaceArea.appendChild(star);
+                    }
+                }
+
+                const gameObj = {
+                    activeAliens: [],
+                    collectedChars: [],
+                    pendingChars: [],
+                    spawnInterval: null,
+                    speedOptions: [7000, 5000, 3500, 2000],
+                    speedIndex: 1,
+                    isGameOver: false,
+                    idCounter: 0,
+                    isFiring: false,
+                    spaceArea: spaceArea,
+                    rocketWrapper: rocketWrapper,
+                    speedIndicatorSpace: speedIndicatorSpace,
+                    level2Collected: level2Collected,
+                    resetButton2: resetButton2,
+
+                    resetGame() {
+                        this.clearAllAliens();
+                        this.collectedChars = [];
+                        this.pendingChars = [...charsL2].sort(() => Math.random() - 0.5);
+                        this.isGameOver = false;
+                        this.idCounter = 0;
+                        this.isFiring = false;
+                        this.currentSpeed = this.speedOptions[this.speedIndex];
+                        this.updateSpeedDisplay();
+                        this.updateCollectedDisplay();
+                        this.resetButton2.classList.add('hidden');
+                        this.stopSpawning();
+                        this.startSpawning();
+                    },
+
+                    clearAllAliens() {
+                        this.activeAliens.forEach(a => {
+                            if (a._checkInterval) clearInterval(a._checkInterval);
+                            if (a.el && a.el.parentNode) a.el.remove();
+                        });
+                        this.activeAliens = [];
+                        const beams = document.querySelectorAll('.laser-beam');
+                        beams.forEach(b => b.remove());
+                    },
+
+                    startSpawning() {
+                        this.stopSpawning();
+                        this.spawnInterval = setInterval(() => {
+                            if (!this.isGameOver && this.pendingChars.length > 0) this.spawnAlien();
+                            if (this.pendingChars.length === 0 && this.activeAliens.length === 0 && !this.isGameOver) this.checkWin();
+                        }, this.currentSpeed);
+                    },
+
+                    stopSpawning() {
+                        if (this.spawnInterval) { clearInterval(this.spawnInterval); this.spawnInterval = null; }
+                    },
+
+                    spawnAlien() {
+                        if (this.pendingChars.length === 0 || this.isGameOver) return;
+                        const char = this.pendingChars.shift();
+                        const rect = this.spaceArea.getBoundingClientRect();
+                        const width = rect.width || 550;
+                        const left = 20 + Math.random() * (Math.max(width - 90, 50) - 20);
+                        const colorClass = alienColorsL2[this.idCounter % alienColorsL2.length];
+                        const el = document.createElement('div');
+                        el.className = 'alien-space ' + colorClass;
+                        el.style.left = left + 'px';
+                        el.style.top = '-100px';
+                        el.setAttribute('data-id', this.idCounter);
+                        el.setAttribute('data-char', char);
+                        const fallDur = this.currentSpeed / 1000 * 1.6;
+                        el.style.animationDuration = fallDur + 's';
+                        el.innerHTML = `
+                            <div class="alien-space-body">
+                              <div class="alien-space-head">
+                                <span class="alien-space-hanzi">${char}</span>
+                                <div class="alien-space-eye left"></div>
+                                <div class="alien-space-eye right"></div>
+                                <div class="alien-space-antenna left-ant"></div>
+                                <div class="alien-space-antenna right-ant"></div>
+                              </div>
+                              <div class="alien-space-body-lower"></div>
+                              <div class="alien-space-feet">
+                                <div class="alien-space-foot"></div>
+                                <div class="alien-space-foot"></div>
+                              </div>
+                            </div>`;
+                        this.spaceArea.appendChild(el);
+                        
+                        const data = { id: this.idCounter, el: el, char: char, hit: false, escaped: false };
+                        this.activeAliens.push(data);
+                        this.idCounter++;
+                        
+                        el.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.onAlienClick(data);
+                        });
+
+                        const checkEsc = setInterval(() => {
+                            const r = el.getBoundingClientRect();
+                            const sr = this.spaceArea.getBoundingClientRect();
+                            if (r.top > sr.bottom + 30 && !data.hit && !data.escaped) {
+                                data.escaped = true;
+                                this.pendingChars.push(data.char);
+                                this.pendingChars.sort(() => Math.random() - 0.5);
+                                this.removeAlien(data.id);
+                                clearInterval(checkEsc);
+                            }
+                            if (data.hit || !data.el.parentNode) clearInterval(checkEsc);
+                        }, 300);
+                        data._checkInterval = checkEsc;
+                    },
+
+                    removeAlien(id) {
+                        const idx = this.activeAliens.findIndex(a => a.id === id);
+                        if (idx >= 0) {
+                            const a = this.activeAliens[idx];
+                            if (a._checkInterval) clearInterval(a._checkInterval);
+                            if (a.el && a.el.parentNode) a.el.remove();
+                            this.activeAliens.splice(idx, 1);
+                        }
+                    },
+
+                    onAlienClick(alienData) {
+                        if (this.isGameOver || alienData.hit || this.isFiring) return;
+                        this.isFiring = true;
+                        playShootSpace();
+
+                        const rocketRect = this.rocketWrapper.getBoundingClientRect();
+                        const alienRect = alienData.el.getBoundingClientRect();
+                        const startX = rocketRect.left + rocketRect.width / 2;
+                        const startY = rocketRect.top - 10; 
+                        const endX = alienRect.left + alienRect.width / 2;
+                        const endY = alienRect.top + alienRect.height / 2;
+                        const dx = endX - startX, dy = endY - startY;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                        const beam = document.createElement('div');
+                        beam.className = 'laser-beam';
+                        beam.style.cssText = `
+                            position: fixed; left: ${startX}px; top: ${startY}px; width: ${length}px; height: 4px;
+                            background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 200, 0, 0.9), #ffdd44, #ffffff);
+                            transform-origin: left center; transform: rotate(${angle}deg); border-radius: 2px;
+                            box-shadow: 0 0 20px rgba(255, 200, 0, 0.6), 0 0 60px rgba(255, 150, 0, 0.3);
+                            z-index: 100; pointer-events: none;
+                        `;
+                        document.body.appendChild(beam);
+                        if (this.rocketWrapper.querySelector('.rocket-flame')) {
+                            this.rocketWrapper.querySelector('.rocket-flame').style.transform = 'scale(1.5)';
+                        }
+
+                        setTimeout(() => {
+                            if (beam.parentNode) beam.remove();
+                            if (this.rocketWrapper.querySelector('.rocket-flame')) {
+                                this.rocketWrapper.querySelector('.rocket-flame').style.transform = 'scale(1)';
+                            }
+                            if (alienData.el && alienData.el.parentNode && !alienData.hit) this.hitAlien(alienData);
+                            this.isFiring = false;
+                        }, 400);
+                    },
+
+                    hitAlien(data) {
+                        if (data.hit || this.isGameOver) return;
+                        data.hit = true;
+                        const rect = data.el.getBoundingClientRect();
+                        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+                        const exp = document.createElement('span');
+                        exp.className = 'explosion';
+                        exp.textContent = '💥';
+                        exp.style.left = cx + 'px'; exp.style.top = cy + 'px';
+                        exp.style.position = 'fixed';
+                        document.body.appendChild(exp);
+                        setTimeout(() => { if (exp.parentNode) exp.remove(); }, 550);
+                        spawnParticles(cx, cy, 14, ['💥', '⭐', '✨', '🌟', '🎯', '💫', '🔥']);
+                        playHitSpace();
+                        this.collectedChars.push(data.char);
+                        this.updateCollectedDisplay();
+                        this.removeAlien(data.id);
+                        this.checkWin();
+                    },
+
+                    checkWin() {
+                        if (this.collectedChars.length >= charsL2.length && !this.isGameOver) {
+                            this.isGameOver = true;
+                            this.stopSpawning();
+                            this.clearAllAliens();
+                            setTimeout(() => {
+                                this.resetButton2.classList.remove('hidden');
+                                const rect = this.spaceArea.getBoundingClientRect();
+                                spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 24, ['🎊', '🎉', '🥳', '🏆', '💯', '👏', '🎈', '🌟', '💖', '🎀', '🚀', '🌳']);
+                                playWinSpace();
+                            }, 500);
+                        }
+                    },
+
+                    updateCollectedDisplay() {
+                        const slots = this.level2Collected.querySelectorAll('.l2-char-slot');
+                        slots.forEach((slot, i) => {
+                            if (i < this.collectedChars.length) {
+                                slot.textContent = this.collectedChars[i];
+                                slot.className = 'l2-char-slot got';
+                            } else {
+                                slot.textContent = '？'; slot.className = 'l2-char-slot empty';
+                            }
+                        });
+                    },
+
+                    updateSpeedDisplay() {
+                        const sec = this.currentSpeed / 1000;
+                        this.speedIndicatorSpace.textContent = sec + '秒';
+                    },
+
+                    setSpeed(index) {
+                        this.speedIndex = Math.max(0, Math.min(index, this.speedOptions.length - 1));
+                        this.currentSpeed = this.speedOptions[this.speedIndex];
+                        this.updateSpeedDisplay();
+                        if (!this.isGameOver && this.initialized) { this.stopSpawning(); this.startSpawning(); }
+                    }
+                };
+
+                gameObj.initialized = true;
+                createStars();
+                gameObj.resetGame();
+
+                speedUpSpace.addEventListener('click', () => { if (gameObj.speedIndex < gameObj.speedOptions.length - 1) gameObj.setSpeed(gameObj.speedIndex + 1); });
+                speedDownSpace.addEventListener('click', () => { if (gameObj.speedIndex > 0) gameObj.setSpeed(gameObj.speedIndex - 1); });
+                resetButton2.addEventListener('click', () => { playResetSound(); gameObj.resetGame(); });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (currentLevel === 2) {
+                        if (e.code === 'Space') {
+                            e.preventDefault();
+                            let targetAlien = null; let maxY = -Infinity;
+                            for (const alien of gameObj.activeAliens) {
+                                if (alien.hit) continue;
+                                const rect = alien.el.getBoundingClientRect();
+                                if (rect.top > maxY) { maxY = rect.top; targetAlien = alien; }
+                            }
+                            if (targetAlien) targetAlien.el.click();
+                        }
+                        if (e.code === 'KeyR' && gameObj.isGameOver) { e.preventDefault(); playResetSound(); gameObj.resetGame(); }
+                    }
+                });
+
+                window._spaceGame = gameObj;
+            }
+
+            // ==================== 第三关 - 完整逻辑 ====================
+            const charsL3 = ['快', '乐', '当', '书', '画', '毛'];
+            const imgListL3 = [
+                { id: 1, src: 'http://mms2.baidu.com/it/u=3709397869,203518354&fm=253&app=138&f=JPEG?w=134&h=186', alt: '踢毽子' },
+                { id: 2, src: 'http://mms2.baidu.com/it/u=1891937188,180785866&fm=253&app=138&f=JPEG?w=640&h=389', alt: '跳绳' },
+                { id: 3, src: 'https://q8.itc.cn/q_70/images03/20250807/3ee81423cc634892aa742e35b647972d.jpeg', alt: '搭积木' },
+                { id: 4, src: 'https://pic1.zhimg.com/100/v2-7c166e108036fc6e03c746b4e65df296_r.jpg', alt: '下棋' },
+                { id: 5, src: 'https://img2.baidu.com/it/u=2145202173,92511518&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500', alt: '一起读书' },
+                { id: 6, src: 'https://img1.baidu.com/it/u=2685239725,2912629871&fm=253&fmt=auto&app=138&f=PNG?w=380&h=380', alt: '老鹰捉小鸡' },
+            ];
+
+            function initLevel3Game() {
+                if (window._level3Game) return;
+                const cardsContainer = document.getElementById('cardsContainerL3');
+                const collectedAreaL3 = document.getElementById('collectedAreaL3');
+                const resetButton3 = document.getElementById('resetButton3');
+
+                const gameObj = {
+                    collectedChars: [],
+                    shuffledImgChars: [],
+                    isAnimating: false,
+
+                    resetGame() {
+                        this.collectedChars = [];
+                        this.isAnimating = false;
+                        resetButton3.classList.add('hidden');
+                        this.updateCollectedDisplay();
+                        this.renderCards();
+                    },
+
+                    renderCards() {
+                        this.shuffledImgChars = [...imgListL3].sort(() => Math.random() - 0.5);
+                        const shuffledChars = [...charsL3].sort(() => Math.random() - 0.5);
+                        this.shuffledImgChars.forEach((img, index) => { img.char = shuffledChars[index]; });
+
+                        cardsContainer.innerHTML = '';
+                        this.shuffledImgChars.forEach((item) => {
+                            const card = document.createElement('div');
+                            card.className = 'card-l3';
+                            card.dataset.char = item.char;
+                            card.dataset.id = item.id;
+                            card.innerHTML = `
+                                <img src="${item.src}" alt="${item.alt}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div style="display:none;width:80%;height:80px;background:#e0e8f0;border-radius:12px;align-items:center;justify-content:center;font-size:0.8rem;color:#888;">${item.alt}</div>
+                                <div class="char-overlay"></div>
+                            `;
+                            card.addEventListener('click', () => this.handleCardClick(card));
+                            cardsContainer.appendChild(card);
+                        });
+                    },
+
+                    handleCardClick(card) {
+                        if (this.isAnimating || card.classList.contains('disabled') || this.collectedChars.length === 6) return;
+                        
+                        this.isAnimating = true;
+                        const char = card.dataset.char;
+                        this.collectedChars.push(char);
+                        this.updateCollectedDisplay();
+                        playCollectL3();
+                        
+                        const overlay = card.querySelector('.char-overlay');
+                        overlay.textContent = char;
+                        card.classList.add('active');
+                        card.classList.add('disabled');
+
+                        this.isAnimating = false;
+                        this.checkWin();
+                    },
+
+                    updateCollectedDisplay() {
+                        const slots = collectedAreaL3.querySelectorAll('.collected-char-l3');
+                        slots.forEach((slot, i) => {
+                            if (i < this.collectedChars.length) {
+                                slot.textContent = this.collectedChars[i];
+                                slot.className = 'collected-char-l3 got';
+                            } else {
+                                slot.textContent = '？'; slot.className = 'collected-char-l3 empty';
+                            }
+                        });
+                    },
+
+                    checkWin() {
+                        if (this.collectedChars.length === 6) {
+                            setTimeout(() => {
+                                resetButton3.classList.remove('hidden');
+                                const rect = cardsContainer.getBoundingClientRect();
+                                spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 24, ['🎊', '🎉', '🥳', '🏆', '💯', '👏', '🎈', '🌟', '🐼', '🎋']);
+                                playWinSpace();
+                            }, 400);
+                        }
+                    }
+                };
+
+                resetButton3.addEventListener('click', () => { playResetSound(); gameObj.resetGame(); });
+                gameObj.resetGame();
+                window._level3Game = gameObj;
+            }
+
+            // ==================== 第四关 - 完整逻辑 (带卡片背景版) ====================
+            const charsL4 = ['母', '页', '止', '斤', '寸', '丁', '千', '全', '旦'];
+            // 将您提供的URL存为背景图数组
+            const bgImagesL4 = [
+                'https://img1.baidu.com/it/u=3368686884,4117996201&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=800',
+                'https://img2.baidu.com/it/u=1620706207,3490566925&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=800',
+                'https://img0.baidu.com/it/u=2721635866,2714100686&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=800',
+                'https://img1.baidu.com/it/u=1935555768,2707704474&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=800'
+            ];
+
+            function initLevel4Game() {
+                if (window._level4Game) return;
+                
+                const matchGrid = document.getElementById('matchGrid');
+                const matchProgress = document.getElementById('matchProgress');
+                const resetButton4 = document.getElementById('resetButton4');
+                const winBannerL4 = document.getElementById('winBannerL4');
+                const collectedContainer = document.getElementById('collectedCharL4Container');
+
+                const gameObj = {
+                    charList: [],
+                    clearedCount: 0,
+
+                    resetGame() {
+                        this.clearedCount = 0;
+                        this.charList = [...charsL4].sort(() => Math.random() - 0.5);
+                        resetButton4.classList.add('hidden');
+                        winBannerL4.classList.remove('show');
+                        this.updateStatus();
+                        this.renderGrid();
+                        this.renderCollection();
+                    },
+
+                    renderGrid() {
+                        matchGrid.innerHTML = '';
+                        this.charList.forEach((char, index) => {
+                            const tile = document.createElement('div');
+                            tile.className = 'match-tile';
+                            
+                            // 【核心修改】：依次循环分配4张背景图
+                            const bgIndex = index % bgImagesL4.length;
+                            tile.style.backgroundImage = `url(${bgImagesL4[bgIndex]})`;
+                            tile.style.backgroundSize = 'cover';
+                            tile.style.backgroundPosition = 'center';
+                            
+                            // 将文字包裹在 span 中，确保不被遮罩层干扰
+                            tile.innerHTML = `<span>${char}</span>`;
+                            tile.addEventListener('click', () => this.handleTileClick(tile, char));
+                            matchGrid.appendChild(tile);
+                        });
+                    },
+
+                    renderCollection() {
+                        const slots = collectedContainer.querySelectorAll('.char-slot-l4');
+                        slots.forEach((slot, i) => {
+                            if (i < this.clearedCount) {
+                                slot.textContent = this.charList[i];
+                                slot.className = 'char-slot-l4 got';
+                            } else {
+                                slot.textContent = '？';
+                                slot.className = 'char-slot-l4 empty';
+                            }
+                        });
+                    },
+
+                    handleTileClick(tile, char) {
+                        if (tile.classList.contains('matched') || this.clearedCount === 9) return;
+
+                        tile.classList.add('matched');
+                        playPopSound();
+
+                        const rect = tile.getBoundingClientRect();
+                        const cx = rect.left + rect.width / 2;
+                        const cy = rect.top + rect.height / 2;
+                        spawnParticles(cx, cy, 12, ['🌟', '🎈', '⭐', '✨', '💫', '🎉']);
+
+                        this.clearedCount++;
+                        this.updateStatus();
+                        this.renderCollection();
+
+                        if (this.clearedCount === 9) {
+                            setTimeout(() => {
+                                resetButton4.classList.remove('hidden');
+                                winBannerL4.classList.add('show');
+                                const gridRect = matchGrid.getBoundingClientRect();
+                                spawnParticles(gridRect.left + gridRect.width / 2, gridRect.top + gridRect.height / 2, 30, ['🎊', '🎉', '🥳', '🏆', '💯', '👏', '🎈', '🌟', '📚', '✏️']);
+                                playWinSpace();
+                            }, 600);
+                        }
+                    },
+
+                    updateStatus() {
+                        matchProgress.textContent = this.clearedCount;
+                    }
+                };
+
+                resetButton4.addEventListener('click', () => {
+                    playResetSound();
+                    gameObj.resetGame();
+                });
+
+                gameObj.resetGame();
+                window._level4Game = gameObj;
+            }
+
+            // ==================== 全局初始化 ====================
+            function initAll() {
+                initBallChamberL1();
+                const slots1 = collectedArea1.querySelectorAll('.collected-char');
+                slots1.forEach(s => {
+                    s.textContent = '？'; s.classList.add('empty-slot');
+                    s.style.background = 'rgba(200,200,200,0.2)'; s.style.border = '3px dashed #ccc';
+                    s.style.color = 'transparent'; s.style.animation = 'none';
+                });
+                resetButton1.classList.add('hidden'); crankButton.disabled = false;
+                
+                if (currentLevel === 2) initSpaceGame();
+                if (currentLevel === 3) initLevel3Game();
+                if (currentLevel === 4) initLevel4Game();
+
+                console.log('🎪 语文互动游戏全关卡已就绪！');
+            }
+            initAll();
+        })();
+    </script>
+</body>
+</html>
